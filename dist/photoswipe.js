@@ -1,4 +1,4 @@
-/*! PhotoSwipe - v4.1.1 - 2016-02-26
+/*! PhotoSwipe - v4.1.2.1 - 2016-02-27
 * http://photoswipe.com
 * Copyright (c) 2016 Dmitry Semenov; */
 (function (root, factory) { 
@@ -2789,7 +2789,7 @@ var _getItemAt,
 			// if it's not image, we return zero bounds (content is not zoomable)
 			return item.bounds;
 		}
-		
+		return false;
 	},
 
 	
@@ -2805,7 +2805,7 @@ var _getItemAt,
 		if(img) {
 
 			item.imageAppended = true;
-			_setImageSize(item, img, (item === self.currItem && _renderMaxResolution) );
+			_setImageSize(item, img);
 			
 			baseDiv.appendChild(img);
 
@@ -2842,8 +2842,12 @@ var _getItemAt,
 		img.onerror = function() {
 			item.loadError = true;
 			onComplete();
-		};		
+		};
 
+		if(item.title != null) {
+			img.title = item.title;
+			img.alt = item.title;
+		}
 		img.src = item.src;// + '?a=' + Math.random();
 
 		return img;
@@ -2905,7 +2909,7 @@ _registerModule('Controller', {
 			index = _getLoopedId(index);
 			var item = _getItemAt(index);
 
-			if(!item || ((item.loaded || item.loading) && !_itemsNeedUpdate)) {
+			if(!item || item.loaded || item.loading) {
 				return;
 			}
 
@@ -2933,7 +2937,7 @@ _registerModule('Controller', {
 			_listen('beforeChange', function(diff) {
 
 				var p = _options.preload,
-					isNext = diff === null ? true : (diff >= 0),
+					isNext = diff === null ? true : (diff > 0),
 					preloadBefore = Math.min(p[0], _getNumItems() ),
 					preloadAfter = Math.min(p[1], _getNumItems() ),
 					i;
@@ -3141,6 +3145,10 @@ _registerModule('Controller', {
 				img = framework.createEl('pswp__img', 'img');
 				img.style.opacity = 1;
 				img.src = item.src;
+				if(item.title != null) {
+					img.title = item.title;
+					img.alt = item.title;
+				}
 				_setImageSize(item, img);
 				_appendImage(index, item, baseDiv, img, true);
 			}
@@ -3166,6 +3174,7 @@ _registerModule('Controller', {
 
 	}
 });
+
 
 /*>>items-controller*/
 
